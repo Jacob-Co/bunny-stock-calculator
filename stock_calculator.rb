@@ -4,9 +4,17 @@ require "sinatra/content_for"
 require "tilt/erubis"
 
 configure do
-  # enable :sessions
-  # set :session_secret, 'secret'
+  enable :sessions
+  set :session_secret, 'secret1210'
   set :erb, :escape_html => true
+end
+
+before do
+  session[:bought_stock] ||= 0
+  session[:sold_stock] ||= 0
+  session[:results] ||= false
+  session[:sell_condition] ||= ""
+  session[:sell_condition_amount] ||= 0
 end
 
 class Stock
@@ -98,37 +106,47 @@ get "/" do
 end
 
 get "/home" do
+  @bought_stock = session[:bought_stock]
+  @sold_stock = session[:sold_stock]
+  @results = session[:results]
+
+  if @results
+    @quantity = number_delimeter(@bought_stock.quantity)
+    @buy_price = number_delimeter(@bought_stock.price)
+    @sell_condition = session[:sell_condition]
+    @sell_condition_value = session[:sell_condition_amount]
+    @net_buy_price = number_delimeter(@bought_stock.net_buy_price)
+    @buy_gross_price = number_delimeter(@bought_stock.gross_price)
+    @net_buy_fee = number_delimeter(@bought_stock.net_buy_fee)
+
+    @percent_gain = number_delimeter(@sold_stock.percent_gain(@bought_stock))
+    @net_profit = number_delimeter(@sold_stock.net_profit(@bought_stock))
+    @net_sell_price = number_delimeter(@sold_stock.net_sell_price)
+    @sell_gross_price = number_delimeter(@sold_stock.gross_price)
+    @net_sell_fee = number_delimeter(@sold_stock.net_sell_fee)
+    @sell_price = number_delimeter(@sold_stock.price)
+  end
+
   erb :home, layout: :layout
 end
 
 post "/home" do
-  @results = true
+  session[:results] = true
+  session[:sell_condition] = params["sell-condition"].capitalize
   stock_quantity = params["qty"].to_f
-  @bought_stock = Stock.new(qty: stock_quantity, price: params["price"].to_f)
-  if params["sell-condition"] == "price"
-    @sold_stock = Stock.new(qty: stock_quantity, price: params["sell-condition-amount"].to_f)
-  elsif params["sell-condition"] == "percent-gain"
-    sell_price = @bought_stock.calculate_sell_price_from_percent_gain(params["sell-condition-amount"].to_f)
-    @sold_stock = Stock.new(qty: stock_quantity, price: sell_price) 
-  elsif params["sell-condition"] == "net-profit"
-    sell_price = @bought_stock.calculate_sell_price_from_net_profit(params["sell-condition-amount"].to_f)
-    @sold_stock = Stock.new(qty: stock_quantity, price: sell_price) 
-  end
-  @quantity = 0
-  @price = 0
-  @amount = 0
-  @quantity = number_delimeter(@bought_stock.quantity) unless @bought_stock.nil?
-  @price = number_delimeter(@bought_stock.price) unless @bought_stock.nil?
-  @amount = number_delimeter(params["sell-condition-amount"].to_f)
-  @net_buy_price = number_delimeter(@bought_stock.net_buy_price)
-  @buy_gross_price = number_delimeter(@bought_stock.gross_price)
-  @net_buy_fee = number_delimeter(@bought_stock.net_buy_fee)
+  session[:bought_stock] = Stock.new(qty: stock_quantity, price: params["price"].to_f)
 
-  @percent_gain = number_delimeter(@sold_stock.percent_gain(@bought_stock))
-  @net_profit = number_delimeter(@sold_stock.net_profit(@bought_stock))
-  @net_sell_price = number_delimeter(@sold_stock.net_sell_price)
-  @sell_gross_price = number_delimeter(@sold_stock.gross_price)
-  @net_sell_fee = number_delimeter(@sold_stock.net_sell_fee)
-  @sell_price = number_delimeter(@sold_stock.price)
-  erb :home, layout: :layout
+  if params["sell-condition"] == "price"
+    session[:sold_stock] = Stock.new(qty: stock_quantity, price: params["sell-condition-amount"].to_f)
+    session[:sell_condition_amount] = number_delimeter(params["sell-condition-amount"].to_f).to_s + "php"
+  elsif params["sell-condition"] == "percent-gain"
+    sell_price = session[:bought_stock].calculate_sell_price_from_percent_gain(params["sell-condition-amount"].to_f)
+    session[:sold_stock] = Stock.new(qty: stock_quantity, price: sell_price) 
+    session[:sell_condition_amount] = number_delimeter(params["sell-condition-amount"].to_f).to_s + "%"
+  elsif params["sell-condition"] == "net-profit"
+    sell_price = session[:bought_stock].calculate_sell_price_from_net_profit(params["sell-condition-amount"].to_f)
+    session[:sold_stock] = Stock.new(qty: stock_quantity, price: sell_price) 
+    session[:sell_condition_amount] = number_delimeter(params["sell-condition-amount"].to_f).to_s + "php"
+  end
+  redirect "/home"
 end

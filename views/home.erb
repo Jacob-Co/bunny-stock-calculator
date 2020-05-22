@@ -1,9 +1,9 @@
 <form action="/home" method="post">
   <label for="qty">Quantity</label>
-  <input type="number" name="qty" id="qty" value="<%= @quantity %>">
+  <input type="number" name="qty" id="qty" value="">
 
-  <label for="price">Price</label>
-  <input type="number" name="price" id="price" value="<%= @price %>" step="0.001">
+  <label for="price">Buy Price</label>
+  <input type="number" name="price" id="price" value="" step="0.001">
 
   <label for="sell-condition">Sell Condition</label>
   <select name="sell-condition" id="sell-condition">
@@ -12,8 +12,8 @@
     <option value="net-profit">Net Profit</option>
   </select>
 
-  <label for="sell-condition-amount">Amount</label>
-  <input type="number" name="sell-condition-amount" id="sell-condition-amount" value="<%= @amount %>" step="0.001">
+  <label for="sell-condition-amount">Sell Condition Value</label>
+  <input type="number" name="sell-condition-amount" id="sell-condition-amount" value="" step="0.001">
 
 
   <input type="submit" value="Compute">
@@ -21,6 +21,11 @@
 
 
 <% if @results%>
+  <h2>Inputs:</h2>
+  <p>Quantity: <%= @quantity %></p>
+  <p>Buy Price: <%= @buy_price %></p>
+  <p>Sell Condition: <%= @sell_condition %></p>
+  <p>Sell Condition Value: <%= @sell_condition_value %></p>
   <h1>Results</h1>
   <p>Sell Price: <%= @sell_price %>php</p>
   <p>Percent Gain: <%= @percent_gain %>%</p>
