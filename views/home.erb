@@ -1,0 +1,36 @@
+<form action="/home" method="post">
+  <label for="qty">Quantity</label>
+  <input type="number" name="qty" id="qty" value="<%= @quantity %>">
+
+  <label for="price">Price</label>
+  <input type="number" name="price" id="price" value="<%= @price %>" step="0.001">
+
+  <label for="sell-condition">Sell Condition</label>
+  <select name="sell-condition" id="sell-condition">
+    <option value="price">Price</option>
+    <option value="percent-gain">Percent Gain</option>
+    <option value="net-profit">Net Profit</option>
+  </select>
+
+  <label for="sell-condition-amount">Amount</label>
+  <input type="number" name="sell-condition-amount" id="sell-condition-amount" value="<%= @amount %>" step="0.001">
+
+
+  <input type="submit" value="Compute">
+</form>
+
+
+<% if @results%>
+  <h1>Results</h1>
+  <p>Sell Price: <%= @sell_price %>php</p>
+  <p>Percent Gain: <%= @percent_gain %>%</p>
+  <p>Net Profit: <%= @net_profit %>php</p>
+  <p>Net buy price: <%= @net_buy_price %>php</p>
+  <p>Net sell price: <%= @net_sell_price %>php</p>
+  <h1>Buy Breakdown</h1>
+  <p>Gross Price: <%= @buy_gross_price %>php</p>
+  <p>Total Buy Tax: <%= @net_buy_fee %>php</p>
+  <h1>Sell Breakdown</h1>
+  <p>Gross Price: <%= @sell_gross_price %>php</p>
+  <p>Total Sales Tax: <%= @net_sell_fee %>php</p>
+<% end %>
