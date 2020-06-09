@@ -86,18 +86,14 @@ class Stock
   end
 end
 
-def negative?(num)
-  num < 0
-end
-
 def number_delimeter(num)
-  num = num.round(2)
+  num = num.round(2) # floor
   whole, decimal = num.to_s.split(".")
   whole.delete!("-") if num.negative?
   return num if whole.size <= 3
   whole = whole.reverse.chars.each_slice(3).map(&:join).join(",").reverse
   whole = whole + "." + decimal unless decimal.nil?
-  "-" + whole if num.negative?
+  whole = "-" + whole if num.negative?
   whole
 end
 
